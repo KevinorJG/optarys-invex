@@ -9,4 +9,13 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @Get("healt")
+  healtCheck(){
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
 }

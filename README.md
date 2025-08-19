@@ -1,1 +1,1 @@
-# optarys-invex
+De momento se esta definiendo el stack

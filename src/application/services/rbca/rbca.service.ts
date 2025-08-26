@@ -1,12 +1,14 @@
 import { TenantContext } from '@contexts/index';
 import { Role, Permission } from '@models/index';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class RbcaService {
     private readonly logger = new Logger(RbcaService.name);
 
-    constructor(private readonly tenantContext: TenantContext) { }
+    constructor(
+        private readonly tenantContext: TenantContext
+    ) { }
 
     /**
      * Obtiene los roles de un usuario
@@ -54,13 +56,20 @@ export class RbcaService {
     }
 
     /**
-     * Obtiene todos los roles disponibles
-     */
+ * Obtiene todos los roles disponibles
+ */
     async getAllRoles(): Promise<Role[]> {
-        this.logger.log('Obteniendo todos los roles');
-        const roles = await this.tenantContext.roles.find();
+        this.logger.log('Obteniendo todos los roles con cache');
+
+        const roles = await this.tenantContext.roles
+            .createQueryBuilder('role')
+            .select(['role.external_id', 'role.name', 'role.description']) // SELECT a nivel de DB
+            .cache('all_roles_cache') // cache con id 'all_roles_cache'
+            .getMany();
+
         this.logger.log(`Roles obtenidos: ${roles.length}`);
         return roles;
     }
+
 }
 

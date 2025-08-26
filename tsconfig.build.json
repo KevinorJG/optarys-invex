@@ -1,4 +1,23 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "test", "dist", "**/*spec.ts"]
+  "compilerOptions": {
+    "outDir": "./dist",
+    "paths": {
+      "@models/*": [
+        "src/infrastructure/context/models/*"
+      ],
+      "@contexts/*": [
+        "src/infrastructure/context/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "test",
+    "dist",
+    "**/*spec.ts"
+  ]
 }

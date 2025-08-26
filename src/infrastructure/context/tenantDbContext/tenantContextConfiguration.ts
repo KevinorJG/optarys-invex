@@ -25,9 +25,6 @@ export class TenantContextConfiguration extends ModuleRegister {
             password: config.get<string>("DB_PASS"),
             database: config.get<string>("DB_NAME"),
             logging: true,
-            cache:{
-              duration: 120000 // 2 minutes
-            },
             entities: [__dirname + '/../models/*.entity{.ts,.js}'], // 👈 EF-style discovery
           }),
         }),

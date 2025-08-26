@@ -4,14 +4,19 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { UseInfrastructure } from './infrastructure/dependencyInjection';
 import { UseApplication } from './application/dependencyInjection';
-import { AuthService } from './application/services/identity/auth.service';
 import { AuthController } from './presentation/controllers/auth/auth.controller';
 import { RbcaService } from './application/services/rbca/rbca.service';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true
+      isGlobal: true,
+    }),
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 120, // seconds
+      max: 100, // maximum number of items in cache
     }),
     ...UseInfrastructure,
     ...UseApplication,
@@ -19,4 +24,4 @@ import { RbcaService } from './application/services/rbca/rbca.service';
   controllers: [AppController, AuthController],
   providers: [AppService, RbcaService],
 })
-export class AppModule {}
+export class AppModule { }

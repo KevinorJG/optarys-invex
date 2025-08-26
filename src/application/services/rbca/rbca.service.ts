@@ -1,5 +1,6 @@
 import { TenantContext } from '@contexts/index';
 import { Role, Permission } from '@models/index';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
@@ -7,7 +8,8 @@ export class RbcaService {
     private readonly logger = new Logger(RbcaService.name);
 
     constructor(
-        private readonly tenantContext: TenantContext
+        private readonly tenantContext: TenantContext,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache
     ) { }
 
     /**
@@ -58,18 +60,32 @@ export class RbcaService {
     /**
  * Obtiene todos los roles disponibles
  */
+    /**
+   * Obtiene todos los roles disponibles con caché en memoria
+   */
     async getAllRoles(): Promise<Role[]> {
-        this.logger.log('Obteniendo todos los roles con cache');
+        this.logger.log('Obteniendo todos los roles con caché en memoria');
 
+        // Verificar si los roles están en caché
+        const cachedRoles = await this.cacheManager.get<Role[]>('all_roles_cache');
+        if (cachedRoles) {
+            this.logger.log('Roles obtenidos desde caché');
+            return cachedRoles;
+        }
+
+        // Si no están en caché, obtenerlos de la base de datos
         const roles = await this.tenantContext.roles
             .createQueryBuilder('role')
-            .select(['role.external_id', 'role.name', 'role.description']) // SELECT a nivel de DB
-            .cache('all_roles_cache') // cache con id 'all_roles_cache'
+            .select(['role.external_id', 'role.name', 'role.description'])
             .getMany();
+
+        // Almacenar los roles en caché por 2 minutos
+        await this.cacheManager.set('all_roles_cache', roles ); // 120 segundos = 2 minutos
 
         this.logger.log(`Roles obtenidos: ${roles.length}`);
         return roles;
     }
+
 
 }
 

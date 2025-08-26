@@ -12,7 +12,6 @@ import {
   UserPermission,
 } from '@models/index';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { tenantDataSourceName } from './tenantContextConfiguration';
 
 @Injectable()
 export class TenantContext {

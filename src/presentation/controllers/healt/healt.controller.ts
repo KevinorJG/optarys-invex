@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, HttpCode } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
@@ -11,6 +11,7 @@ export class HealtController {
   ) {}
 
   @Get('postgres')
+  @HttpCode(200)
   async checkPostgres(): Promise<{
     status: PostgresHealthStatus,
     detail?: string,

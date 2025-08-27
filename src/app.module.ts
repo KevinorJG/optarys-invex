@@ -1,27 +1,25 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import { UseInfrastructure } from './infrastructure/dependencyInjection';
-import { UseApplication } from './application/dependencyInjection';
-import { AuthController } from './presentation/controllers/auth/auth.controller';
-import { RbcaService } from './application/services/rbca/rbca.service';
-import { CacheModule } from '@nestjs/cache-manager';
+
+// Configuracion de capas
+import { InfrastructureConfiguration } from './infrastructure/dependencyInjection';
+import { ApplicationConfiguration } from './application/dependencyInjection';
+import { PresentationConfiguration } from './presentation/dependencyInjection';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    CacheModule.register({
-      isGlobal: true,
-      ttl: 120, // seconds
-      max: 100, // maximum number of items in cache
-    }),
-    ...UseInfrastructure,
-    ...UseApplication,
+    ...InfrastructureConfiguration.modulesCollection(),
+    ...ApplicationConfiguration.modulesCollection(),
   ],
-  controllers: [AppController, AuthController],
-  providers: [AppService, RbcaService],
+  controllers: [
+    ...PresentationConfiguration.useControllers()
+  ],
+  providers: [
+    ...ApplicationConfiguration.servicesCollection(),
+    ...InfrastructureConfiguration.servicesCollection()
+  ],
 })
 export class AppModule { }

@@ -8,7 +8,10 @@
       ],
       "@contexts/*": [
         "src/infrastructure/context/*"
-      ]
+      ],
+      "@services/*": [
+        "src/application/services/*"
+      ],
     }
   },
   "include": [

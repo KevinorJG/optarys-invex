@@ -10,4 +10,6 @@ export abstract class ModuleRegister {
   static register(): DynamicModule {
     throw new Error('Not implemented');
   }
+
+  
 }

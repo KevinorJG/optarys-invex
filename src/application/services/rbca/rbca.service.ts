@@ -2,6 +2,7 @@ import { TenantContext } from '@contexts/index';
 import { Role, Permission } from '@models/index';
 import { Injectable } from '@nestjs/common';
 import { LoggerService } from '@services/index';
+import { RoleDto, PermissionDto } from './dtos/index';
 
 @Injectable()
 export class RbcaService {
@@ -9,7 +10,7 @@ export class RbcaService {
 
     constructor(
         private readonly tenantContext: TenantContext,
-    ) {}
+    ) { }
 
     /**
      * Obtiene los roles de un usuario
@@ -60,13 +61,38 @@ export class RbcaService {
     /**
    * Obtiene todos los roles disponibles con caché en memoria
    */
-    async getAllRoles(): Promise<Role[]> {
+    async getAllRoles(): Promise<RoleDto[]> {
         this.loggerService.log(`Obteniendo todos los roles disponibles`);
-        return await this.tenantContext.roles
+        const roles = await this.tenantContext.roles
             .createQueryBuilder('role')
             .select(['role.external_id', 'role.name', 'role.description'])
             .getMany();
+
+        return roles.map(role => ({
+            id: role.externalId,
+            name: role.name,
+            description: role.description,
+        }));
     }
+
+    /**
+     * Obtiene todos los permisos disponibles
+     */
+    async getAllPermissions(): Promise<PermissionDto[]> {
+        this.loggerService.log(`Obteniendo todos los permisos disponibles`);
+        const permissions = await this.tenantContext.permissions
+            .createQueryBuilder('perm')
+            .select(['perm.externalId', 'perm.name', 'perm.description'])
+            .getMany();
+
+        return permissions.map(perm => ({
+            id: perm.externalId,
+            name: perm.name,
+            description: perm.description,
+        }));
+    }
+
+    
 
 }
 

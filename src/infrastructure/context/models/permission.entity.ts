@@ -1,4 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { on } from "events";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn } from "typeorm";
+import { UserPermission } from "./user-permission.entity";
+import { RolePermission } from "./role-permission.entity";
 
 @Entity("permissions")
 export class Permission {
@@ -16,4 +19,11 @@ export class Permission {
 
   @Column({ nullable: true })
   description: string;
+
+  @OneToMany(() => RolePermission, rp => rp.permission)
+  rolePermissions: RolePermission[];
+ 
+  @OneToMany(() => UserPermission, up => up.permission)
+  userPermissions: UserPermission[];
+
 }

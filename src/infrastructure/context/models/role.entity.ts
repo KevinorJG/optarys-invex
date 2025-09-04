@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 import { Tenant } from "./tenant.entity";
 import { UserRole } from "./user-role.entity";
+import { RolePermission } from "./role-permission.entity";
 
 @Entity("roles")
 export class Role {
@@ -20,6 +21,9 @@ export class Role {
   @JoinColumn({ name: "tenant_id" })
   tenant: Tenant;
 
-  @OneToMany(() => UserRole, ur => ur.roleId)
+  @OneToMany(() => UserRole, ur => ur.role) 
   userRoles: UserRole[];
+
+  @OneToMany(() => RolePermission, rp => rp.role)
+  rolePermissions: RolePermission[];
 }

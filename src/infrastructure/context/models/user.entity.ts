@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMan
 import { UserStatus } from "./user-status.entity";
 import { Tenant } from "./tenant.entity";
 import { UserRole } from "./user-role.entity";
+import { UserPermission } from "./user-permission.entity";
 
 @Entity("users")
 export class User {
@@ -39,4 +40,9 @@ export class User {
 
   @OneToMany(() => UserRole, ur => ur.userId)
   userRoles: UserRole[];
+
+  @OneToMany(() => UserPermission, up => up.userId)
+  userPermissions: UserPermission[];
+
+
 }

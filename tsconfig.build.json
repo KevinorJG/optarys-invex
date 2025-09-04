@@ -12,6 +12,9 @@
       "@services/*": [
         "src/application/services/*"
       ],
+      "@guards/*": [
+        "src/application/guards/*"
+      ]
     }
   },
   "include": [

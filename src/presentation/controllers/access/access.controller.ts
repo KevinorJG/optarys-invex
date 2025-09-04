@@ -1,11 +1,13 @@
-import { Controller, Get, HttpCode, Logger } from '@nestjs/common';
+import { Controller, Get, HttpCode, Logger, UseGuards } from '@nestjs/common';
 import { RbcaService } from '@services/index';
 import { PermissionDto, RoleDto } from '@services/rbca/dtos/index';
+import { AuthGuard } from '@guards/index';
 
 @Controller('access-controll')
+@UseGuards(AuthGuard)
 export class AccessController {
 
-    constructor(private readonly rbcaService: RbcaService){}
+    constructor(private readonly rbcaService: RbcaService) { }
 
     @Get('roles')
     @HttpCode(200)

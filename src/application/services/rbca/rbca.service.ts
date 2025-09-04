@@ -1,4 +1,4 @@
-import { TenantContext } from '@contexts/index';
+import { TenantContext } from '@contexts/tenant';
 import { Role, Permission } from '@models/index';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { RoleDto, PermissionDto } from './dtos/index';

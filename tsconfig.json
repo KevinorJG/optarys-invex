@@ -33,7 +33,10 @@
       ],
       "@guards/*": [
         "src/application/guards/*"
-      ]
+      ],
+      "@features/*": [
+        "src/application/features/*"
+      ],
     }
   }
 }

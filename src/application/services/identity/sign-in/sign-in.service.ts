@@ -1,4 +1,4 @@
-import { TenantContext } from '@contexts/index';
+import { TenantContext } from '@contexts/tenant';
 import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JwtDto, JwtPermissionsClaim } from './dtos/jwtDto';
@@ -17,28 +17,32 @@ export class SignInService {
         private readonly rbcaService: RbcaService,
     ) { }
 
-    async signIn(username: string, password: string): Promise<SignInResponseDto> {
+    async signIn(signInType: 'email' | 'username', identifier: string, password: string): Promise<SignInResponseDto> {
 
-        this.loggerService.log(`Intentando iniciar sesión para usuario: ${username}`);
+        this.loggerService.log(`Intentando iniciar sesión para usuario: ${identifier}`);
         try {
-            const user = await this.context.users.findOneBy({ username });
+            let query = signInType === 'email' ?
+                this.context.users.createQueryBuilder('user').where('user.email = :identifier', { identifier }) :
+                this.context.users.createQueryBuilder('user').where('user.username = :identifier', { identifier });
+
+            const user = await query.getOne();
 
             if (!user) {
-                this.loggerService.warn(`Usuario no encontrado: ${username}`);
+                this.loggerService.warn(`Usuario no encontrado: ${identifier}`);
                 throw new NotFoundException('Usuario no encontrado');
             }
             if (!this.verifyPassword(password, user.password)) {
-                this.loggerService.warn(`Contraseña inválida para usuario: ${username}`);
+                this.loggerService.warn(`Contraseña inválida para usuario: ${identifier}`);
                 throw new NotFoundException('Credenciales inválidas');
             }
 
-            this.loggerService.log(`Usuario autenticado: ${username}`);
+            this.loggerService.log(`Usuario autenticado: ${user.externalId}`);
             return {
                 accessToken: await this.generateJwtToken(user),
                 expiresIn: 3600, // 1 hora en segundos
             };
         } catch (error) {
-            this.loggerService.error(`Error en inicio de sesión para usuario: ${username}`, error);
+            this.loggerService.error(`Error en inicio de sesión para usuario: ${identifier}`, error);
             if (error instanceof NotFoundException) {
                 throw error;
             }
@@ -46,6 +50,7 @@ export class SignInService {
         }
 
     }
+
 
     private async generateJwtToken(user: User): Promise<string> {
         this.loggerService.log(`Generando token JWT para usuario ID: ${user.id}`);

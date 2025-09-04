@@ -6,10 +6,12 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 export class InfrastructureConfiguration {
   static modulesCollection(): (DynamicModule | Type<any> | Promise<DynamicModule> | ForwardReference<any>)[] {
     return [
-      CacheModule.register({
-        ttl: 120, // seconds
-        max: 100, // maximum number of items in cache
-      }),
+      CacheModule.register(
+        {
+          isGlobal: true,
+          ttl: 3600000
+        }
+      ), // milisegundos equivalente a 1 hora
       TenantContextConfiguration.register()
     ];
 

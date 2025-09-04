@@ -1,16 +1,17 @@
 import { TenantContext } from '@contexts/index';
 import { Role, Permission } from '@models/index';
-import { Injectable } from '@nestjs/common';
-import { LoggerService } from '@services/index';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { RoleDto, PermissionDto } from './dtos/index';
+import { CACHE_MANAGER, Cache} from '@nestjs/cache-manager';
 
 @Injectable()
 export class RbcaService {
-    private readonly loggerService = LoggerService.forContext(RbcaService.name);
 
+    private readonly loggerService = new Logger(RbcaService.name);
     constructor(
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
         private readonly tenantContext: TenantContext,
-    ) { }
+    ) {}
 
     /**
      * Obtiene los roles de un usuario
@@ -59,40 +60,62 @@ export class RbcaService {
 
 
     /**
-   * Obtiene todos los roles disponibles con caché en memoria
-   */
+     * Obtiene todos los roles disponibles con caché en memoria
+     */
     async getAllRoles(): Promise<RoleDto[]> {
-        this.loggerService.log(`Obteniendo todos los roles disponibles`);
-        const roles = await this.tenantContext.roles
-            .createQueryBuilder('role')
-            .select(['role.external_id', 'role.name', 'role.description'])
-            .getMany();
+        const cacheKey = 'all_roles';
+        let roles: RoleDto[] | undefined = await this.cacheManager.get<RoleDto[]>(cacheKey);
 
-        return roles.map(role => ({
-            id: role.externalId,
-            name: role.name,
-            description: role.description,
-        }));
+        if (!roles) {
+            this.loggerService.log(`[Roles] Cache MISS: consultando en base de datos`);
+            const dbRoles = await this.tenantContext.roles
+                .createQueryBuilder('role')
+                .select(['role.externalId', 'role.name', 'role.description'])
+                .getMany();
+
+            roles = dbRoles.map(role => ({
+                id: role.externalId,
+                name: role.name,
+                description: role.description,
+            }));
+
+            await this.cacheManager.set(cacheKey, roles);
+            this.loggerService.log(`[Roles] Guardados en cache (${roles.length} roles)`);
+        } else {
+            this.loggerService.log(`[Roles] Cache HIT: obtenidos ${roles.length} roles de la cache`);
+        }
+        
+        return roles;
     }
 
     /**
-     * Obtiene todos los permisos disponibles
+     * Obtiene todos los permisos disponibles con caché en memoria
      */
     async getAllPermissions(): Promise<PermissionDto[]> {
-        this.loggerService.log(`Obteniendo todos los permisos disponibles`);
-        const permissions = await this.tenantContext.permissions
-            .createQueryBuilder('perm')
-            .select(['perm.externalId', 'perm.name', 'perm.description'])
-            .getMany();
+        const cacheKey = 'all_permissions';
+        let permissions: PermissionDto[] | undefined = await this.cacheManager.get<PermissionDto[]>(cacheKey);
 
-        return permissions.map(perm => ({
-            id: perm.externalId,
-            name: perm.name,
-            description: perm.description,
-        }));
+        if (!permissions) {
+            this.loggerService.log(`[Permisos] Cache MISS: consultando en base de datos`);
+            const dbPermissions = await this.tenantContext.permissions
+                .createQueryBuilder('perm')
+                .select(['perm.externalId', 'perm.name', 'perm.description'])
+                .getMany();
+
+            permissions = dbPermissions.map(perm => ({
+                id: perm.externalId,
+                name: perm.name,
+                description: perm.description,
+            }));
+
+            await this.cacheManager.set(cacheKey, permissions);
+            this.loggerService.log(`[Permisos] Guardados en cache (${permissions.length} permisos)`);
+        } else {
+             this.loggerService.log(`[Permisos] Cache HIT: obtenidos ${permissions.length} permisos de la cache`);
+        }
+       
+        return permissions;
     }
-
-    
 
 }
 

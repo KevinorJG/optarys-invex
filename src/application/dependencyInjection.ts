@@ -3,6 +3,7 @@ import { SignInService } from '@services/identity';
 import { RbcaService } from '@services/rbca';
 import { CqrsModule } from '@nestjs/cqrs';
 import { featuresHandlersCollection } from '@features/handlers';
+import { MediatorService } from '@services/mediator';
 
 export class ApplicationConfiguration {
     static modulesCollection(): (DynamicModule | Type<any> | Promise<DynamicModule> | ForwardReference<any>)[] {
@@ -16,10 +17,10 @@ export class ApplicationConfiguration {
         return [
             SignInService,
             RbcaService,
-            ...featuresHandlersCollection
-
+            MediatorService,
+            ...featuresHandlersCollection,
         ];
     }
 
-    
+
 }

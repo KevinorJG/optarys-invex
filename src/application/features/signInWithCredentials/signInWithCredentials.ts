@@ -1,9 +1,17 @@
 import { Command } from "@nestjs/cqrs";
+import { IsNotEmpty, MinLength } from 'class-validator';
 
 export class SignInWithCredentials extends Command<any> {
-    constructor(
-        public readonly identifier: string,
-        public readonly password: string) {
+    @IsNotEmpty()
+    public readonly identifier: string;
+
+    @IsNotEmpty()
+    @MinLength(6)
+    public readonly password: string;
+
+    constructor(identifier: string, password: string) {
         super();
+        this.identifier = identifier;
+        this.password = password;
     }
 }

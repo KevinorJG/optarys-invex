@@ -1,5 +1,7 @@
-import { signInWithCredentialsHandler } from "./signInWithCredentials/signInWithCredentialsCommandHandler";
+import { CreateAccountHandler } from "./account/createAccount/CreateAccountHandler";
+import { signInWithCredentialsHandler } from "./signInWithCredentials/signInWithCredentialsHandler";
 
 export const featuresHandlersCollection : any[] = [
-    signInWithCredentialsHandler
+    signInWithCredentialsHandler,
+    CreateAccountHandler
 ]

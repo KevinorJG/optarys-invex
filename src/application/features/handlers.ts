@@ -1,5 +1,5 @@
 import { CreateAccountHandler } from "./account/createAccount/CreateAccountHandler";
-import { signInWithCredentialsHandler } from "./signInWithCredentials/signInWithCredentialsHandler";
+import { signInWithCredentialsHandler } from "./signup/signInWithCredentials/signInWithCredentialsHandler";
 
 export const featuresHandlersCollection : any[] = [
     signInWithCredentialsHandler,

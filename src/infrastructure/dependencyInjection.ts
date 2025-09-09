@@ -5,6 +5,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
+import { PrometheusModule } from "@willsoto/nestjs-prometheus";
 
 export class InfrastructureConfiguration {
   static modulesCollection(): (DynamicModule | Type<any> | Promise<DynamicModule> | ForwardReference<any>)[] {
@@ -26,6 +27,9 @@ export class InfrastructureConfiguration {
             algorithm: 'HS256',
           },
         }),
+      }),
+      PrometheusModule.register({
+          path: "/metrics",
       }),
       TerminusModule.forRoot({ errorLogStyle: 'json', logger: true }),
       TenantContextConfiguration.register()

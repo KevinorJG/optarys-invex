@@ -18,9 +18,17 @@ async function bootstrap() {
     }),
   });
 
+  app.use(['/metrics'],
+    basicAuth({
+      challenge: true,
+      users: {
+        admin: '12345'
+      },
+    }),
+  )
   useSwagger(app);
 
-  app.useGlobalPipes(new ValidationPipe({transform: true}));
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   await app.listen(process.env.PORT ?? 3000);
 }

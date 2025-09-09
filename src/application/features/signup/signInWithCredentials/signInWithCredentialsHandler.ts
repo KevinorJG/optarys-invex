@@ -1,17 +1,19 @@
 import { CommandHandler } from "@nestjs/cqrs";
 import { SignInWithCredentials } from "./signInWithCredentials";
-import { SignInService } from "@services/identity";
-import { ICommandHandler } from "src/application/common/handlers/command-handler";
+import { SignInService, SignInResponseDto } from "@services/identity";
+import { ICommandHandler } from "@common/handlers";
+import { Result } from "@common/responses";
 
 @CommandHandler(SignInWithCredentials)
 export class signInWithCredentialsHandler implements ICommandHandler<SignInWithCredentials> {
     constructor(private readonly signInService: SignInService) { }
-
-    async execute(command: SignInWithCredentials): Promise<any> {
+    async execute(command: SignInWithCredentials): Promise<Result<SignInResponseDto>> {
         const { identifier, password } = command;
 
         const type = this.isUsernameOrEmail(identifier);
-        return await this.signInService.signIn(type, identifier, password);
+
+        const response = await this.signInService.signIn(type, identifier, password)
+        return Result.success(response);
     }
 
     isUsernameOrEmail(identifier: string): 'username' | 'email' {

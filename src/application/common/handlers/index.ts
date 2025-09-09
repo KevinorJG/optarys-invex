@@ -1,0 +1,1 @@
+export { type ICommandHandler } from "./command-handler";

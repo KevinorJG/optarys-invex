@@ -1,9 +1,10 @@
-import { DynamicModule, ForwardReference, Type } from '@nestjs/common';
+import { DynamicModule, ForwardReference, Logger, Type } from '@nestjs/common';
 import { TenantContextConfiguration } from '@contexts/tenant';
 import { CacheInterceptor, CacheModule } from '@nestjs/cache-manager';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TerminusModule } from '@nestjs/terminus';
 
 export class InfrastructureConfiguration {
   static modulesCollection(): (DynamicModule | Type<any> | Promise<DynamicModule> | ForwardReference<any>)[] {
@@ -26,6 +27,7 @@ export class InfrastructureConfiguration {
           },
         }),
       }),
+      TerminusModule.forRoot({ errorLogStyle: 'json', logger: true }),
       TenantContextConfiguration.register()
     ];
 

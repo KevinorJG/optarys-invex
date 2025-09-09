@@ -1,61 +1,38 @@
-import { Controller, Get, HttpCode } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import {
+  DiskHealthIndicator,
+  HealthCheck,
+  HealthCheckService,
+  MemoryHealthIndicator,
+  TypeOrmHealthIndicator
+} from '@nestjs/terminus';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { platform } from 'os';
 
-type PostgresHealthStatus = 'saludable' | 'medio' | 'requiere_revision' | 'error';
-
+const rootPath = platform() === 'win32' ? 'C:\\' : '/';
 @Controller('healt')
 export class HealtController {
   constructor(
-    @InjectDataSource('TenantContext') private readonly dataSource: DataSource
-  ) {}
+    @InjectDataSource('TenantContext') private readonly dataSource: DataSource,
+    private readonly health: HealthCheckService,
+    private readonly db: TypeOrmHealthIndicator,
+    private readonly memory: MemoryHealthIndicator,
+    private readonly disk: DiskHealthIndicator
+  ) { }
 
-  @Get('postgres')
-  @HttpCode(200)
-  async checkPostgres(): Promise<{
-    status: PostgresHealthStatus,
-    detail?: string,
-    durationMs: number,
-    timestamp: string
-  }> {
-    const start = process.hrtime.bigint();
-    let status: PostgresHealthStatus = 'saludable';
-    let detail: string | undefined = undefined;
+  @Get()
+  @HealthCheck()
+  check() {
+    return this.health.check([
+      // Verifica la conexión a Postgres usando el DataSource directamente
+      () => this.db.pingCheck('postgres', { connection: this.dataSource }),
 
-    try {
-      await this.dataSource.query('SELECT 1');
-      const end = process.hrtime.bigint();
-      const durationMs = Number(end - start) / 1_000_000;
+      // Verifica la memoria RSS (alerta si > 200MB)
+      () => this.memory.checkRSS('memory_rss', 200 * 1024 * 1024),
 
-      // Umbrales de ejemplo:
-      if (durationMs < 100) {
-        status = 'saludable';
-      } else if (durationMs < 500) {
-        status = 'medio';
-        detail = 'La respuesta fue más lenta de lo esperado.';
-      } else {
-        status = 'requiere_revision';
-        detail = 'La consulta demoró demasiado, posible problema de rendimiento.';
-      }
-
-      return {
-        status,
-        detail,
-        durationMs,
-        timestamp: new Date().toISOString(),
-      };
-    } catch (error) {
-      status = 'error';
-      detail = error.message;
-      const end = process.hrtime.bigint();
-      const durationMs = Number(end - start) / 1_000_000;
-
-      return {
-        status,
-        detail,
-        durationMs,
-        timestamp: new Date().toISOString(),
-      };
-    }
+      // Verifica espacio en disco en la carpeta raíz
+      //() => this.disk.checkStorage('disk', { path: rootPath, thresholdPercent: 0.5 }),
+    ]);
   }
 }

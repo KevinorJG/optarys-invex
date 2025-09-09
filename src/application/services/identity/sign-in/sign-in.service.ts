@@ -5,6 +5,8 @@ import { JwtDto, JwtPermissionsClaim } from './dtos/jwtDto';
 import { User } from '@models/user.entity';
 import { RbcaService } from '@services/rbca/rbca.service';
 import { SignInResponseDto } from './dtos/signInResponseDto';
+import { ConfigService } from '@nestjs/config';
+import ms, { StringValue } from 'ms';
 
 @Injectable()
 export class SignInService {
@@ -15,6 +17,7 @@ export class SignInService {
         private readonly context: TenantContext,
         private readonly jwtService: JwtService,
         private readonly rbcaService: RbcaService,
+        private readonly configService: ConfigService
     ) { }
 
     async signIn(signInType: 'email' | 'username', identifier: string, password: string): Promise<SignInResponseDto> {
@@ -39,7 +42,7 @@ export class SignInService {
             this.loggerService.log(`Usuario autenticado: ${user.externalId}`);
             return {
                 accessToken: await this.generateJwtToken(user),
-                expiresIn: 3600, // 1 hora en segundos
+                expiresIn: ms(this.configService.get<string>('JWT_EXPIRATION_TIME') as StringValue) / 1000
             };
         } catch (error) {
             this.loggerService.error(`Error en inicio de sesión para usuario: ${identifier}`, error);
@@ -50,7 +53,6 @@ export class SignInService {
         }
 
     }
-
 
     private async generateJwtToken(user: User): Promise<string> {
         this.loggerService.log(`Generando token JWT para usuario ID: ${user.id}`);

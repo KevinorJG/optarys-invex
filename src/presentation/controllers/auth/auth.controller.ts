@@ -11,11 +11,17 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     content: {
-      
+
     }
   })
   @ApiBody({ type: SignInWithCredentialsDto, required: true })
   async signIn(@Body() request: SignInWithCredentialsDto) {
-    return await this.mediator.execute(request);
+
+    const result = await this.mediator.execute(request);
+
+    return result.match(
+      (value) => value,
+      (error, details) => (details)
+    );
   }
 }

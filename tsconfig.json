@@ -37,6 +37,9 @@
       "@features/*": [
         "src/application/features/*"
       ],
+      "@common/*": [
+        "src/application/common/*"
+      ]
     }
   }
 }

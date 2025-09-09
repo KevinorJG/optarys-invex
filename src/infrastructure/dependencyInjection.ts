@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TerminusModule } from '@nestjs/terminus';
 import { PrometheusModule } from "@willsoto/nestjs-prometheus";
+import { MetricsController } from '../presentation/controllers/metrics/metrics.controller'
 
 export class InfrastructureConfiguration {
   static modulesCollection(): (DynamicModule | Type<any> | Promise<DynamicModule> | ForwardReference<any>)[] {
@@ -29,7 +30,8 @@ export class InfrastructureConfiguration {
         }),
       }),
       PrometheusModule.register({
-          path: "/metrics",
+          controller: MetricsController,
+          
       }),
       TerminusModule.forRoot({ errorLogStyle: 'json', logger: true }),
       TenantContextConfiguration.register()

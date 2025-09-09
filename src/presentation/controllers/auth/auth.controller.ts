@@ -1,16 +1,21 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { SignInWithCredentials } from '@features/signup/signInWithCredentials';
 import { MediatorService } from '@services/mediator';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { SignInWithCredentialsDto } from './requests/SignInWithCredentialsDTO';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly mediator: MediatorService) {}
+  constructor(private readonly mediator: MediatorService) { }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiBody({type: SignInWithCredentials})
-  async signIn(@Body() request: SignInWithCredentials) {
+  @ApiOkResponse({
+    content: {
+      
+    }
+  })
+  @ApiBody({ type: SignInWithCredentialsDto, required: true })
+  async signIn(@Body() request: SignInWithCredentialsDto) {
     return await this.mediator.execute(request);
   }
 }
